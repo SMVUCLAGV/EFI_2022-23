@@ -3,7 +3,6 @@
 
 #include "Constants.h"
 #include "NoiseReduced.h"
-#include "Tachometer.h"
 #include "spi_adc.h"
 
 class Controller {
@@ -17,13 +16,8 @@ public:
   // Sends the current sensor values and requested parameter information.
   void sendCurrentData();
 
-  // If the currentlySendingData flag is set and the minTimePerSampleReported
-  // has passed since that last transmission, sends out a data sample.
+  // If the currentlySendingData flag is set and timer1 triggers an interrupt sends out a data sample.
   void trySendingData();
-
-  // Checks the serial read buffer for incoming bytes. If bytes are found, acts
-  // according to the documentation specified in EFI Documentation.
-  bool getCommand();
 
   // Increments the counted number of revolutions since the last RPM update.
   // Every 2nd revolution, switches the INJ_Pin to HIGH and sets a timer for
@@ -35,13 +29,11 @@ public:
   void updateRPM();
 
   // Performs 2D interpolation to lookup a pulse time for the given engine conditions.
+  void lookupPulseTime();
 
-  long getFuelLevel();
   //Finds the total amount of fuel used by measuiring the amount of fuel injected every revolution
   //and accumulating the amount. Returns fuel level.
-
-  void lookupPulseTime();
-  double computeThrottleAdjustment();
+  long getFuelUsed();
 
   // If singleVal is true, determines the pulse time for the specified cell [row][col]
   // of the AFR Table in units of microseconds times kelvin.
@@ -55,7 +47,7 @@ public:
 
   // Checks to see if the engine is on or off. If the engine switches state since the last
   // check, changes parameters accordingly.
-  void checkEngineState();
+  void updateEngineState();
 
   bool inStartingRevs();
 
@@ -97,15 +89,15 @@ private:
   int revolutions; //misc
   unsigned long totalRevolutions; //misc
   unsigned long startingRevolutions; //misc
+
   unsigned long previousRev; //misc
 
-  unsigned long totalPulseTime;//misc
+  unsigned long totalPulseTime; //misc
   unsigned long lastPulse;
   unsigned long totalFuelUsed;
-  unsigned long fuelLevel;
+
   long lastRPMCalcTime;//RPM stuff
   long injectorPulseTime;
-  int delayCount;
 
   //Data Retrieval
   bool enableSendingData;
@@ -115,14 +107,11 @@ private:
   const char baseFileName[6] = "sdlog";
   char fileName[20] = "NOFILE";
 
-  long int minTimePerSampleReported;
-  long lastSerialOutputTime;
   double scaledMAP;
   double scaledRPM;
   int mapIndex;
   int rpmIndex;
 
-  double throttleAdjustment;
   unsigned long lastThrottleMeasurementTime;
 
   double constModifier;
@@ -132,6 +121,7 @@ private:
   double DTPS;
   double ECT;
   double IAT;
+
   double MAP;
   double prevdMAP;
   double prevMAP;
@@ -160,9 +150,8 @@ private:
     {14.5,14.8,15.2,15.3,15.3,15.2,14.6,14.3,13.8,13.6},
     {14.5,14.8,15.0,15.3,15.3,15.2,14.6,14.3,13.8,13.6}   // maximum pressure
     };
-  
-  long injectorBasePulseTimes[numTableRows][numTableCols];
 
+  long injectorBasePulseTimes[numTableRows][numTableCols];
 };
 
 #endif

@@ -71,9 +71,8 @@ const int numRevsForStart = 25;
 const int numMagnets = 1;
 
 //constants for fuel level sensor
-const unsigned long givenFlow = (38 / 60) / 10e6; //mass flow rate in g/microsecond 
+const double givenFlow = (38 / 60.0) / 10e6; //mass flow rate in g/microsecond 
 //(could be 38,60,80,128,190,230,or 248 depending on Injection System):
-const int totalFuel = 1000; //total amount of gas to begin with (mL)
 const double density = 0.789; //density in g/mL
 
 // Define the range of values that an AFR table value can take.

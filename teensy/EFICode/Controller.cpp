@@ -5,14 +5,15 @@
 #include "SD.h"
 
 Controller::Controller() {
-    //Sets injector pin to output mode. All other pins default to input mode.
+    // Sets injector pin to output mode. All other pins default to input mode.
     pinMode(INJ_Pin, OUTPUT);
 
-    //Initializes Serial input and output at the specified baud rate.
+    // Initializes Serial input and output at the specified baud rate.
     Serial.begin(BAUD_RATE);
+
+    // Prevent blocking caused by the lack of a serial connection with a laptop (fixed W22)
     long t = micros();
     while(!Serial && (micros() - t < 1e6));
-
 
     // Initializing message
     Serial.write("Initializing...\n");
@@ -22,13 +23,8 @@ Controller::Controller() {
 
     // Update sensors to their initial values.
     readSensors();
-
-    // Perform quick diagnostics here...
-    // runDiagnostics();
-
-    // Indicate ready
-    //Serial.write("Ready to go!\n");
 }
+
 
 bool Controller::readSensors() {
   if (refreshAvailable){
@@ -65,16 +61,12 @@ bool Controller::readSensors() {
     return true;
 }
 
+
 void Controller::initializeParameters() {
 
     // Start at zero revolutions.
     revolutions = 0;
     totalRevolutions = 0;
-
-/*  SENDING BACK DATA ON TIMER1
-    // Set the max spee d at which data is reported
-    minTimePerSampleReported = 1E3;  //In microseconds
-*/
 
     // Number of revolutions that must pass before recalculating RPM.
     constModifier = 1.0;
@@ -86,7 +78,6 @@ void Controller::initializeParameters() {
 
     // Initialize AFR values.
     AFR = 0;
-    throttleAdjustment = 1.0;
     lastThrottleMeasurementTime = micros();
 
     // Initialize MAP averaging
@@ -107,9 +98,10 @@ void Controller::initializeParameters() {
     // when the engine is not running.
     INJisDisabled = true;
 
-    // Used to determine the amount of fuel used.
+    // Used to determine the amount of fuel used. (W22)
     totalPulseTime = 0;
     lastPulse = 0;
+    totalFuelUsed = 0;
 
     // True   -> data reporting on.
     // False  -> data reporting off.
@@ -166,6 +158,7 @@ void Controller::countRevolution() {
   }
 }
 
+
 void Controller::enableINJ() {
   INJisDisabled = false;
 }
@@ -204,6 +197,7 @@ void Controller::pulseOff() {
   haveInjected = true;
 }
 
+
 void Controller::updateRPM() {
   noInterrupts();
   int tempRev = revolutions; //Prevents revolutions being read while it is being modified by the
@@ -224,12 +218,9 @@ void Controller::updateRPM() {
   }
 }
 
-long Controller::getFuelLevel() {
+long Controller::getFuelUsed() {
   //volumetric flow rate = mass flow rate / density
-  unsigned long fuelUsed = givenFlow * micros() / density; //in mL
-  totalFuelUsed += fuelUsed;
-  fuelLevel = totalFuel - totalFuelUsed;
-  return fuelLevel;
+  return givenFlow * totalPulseTime / density; //in mL
 }
 
 
@@ -284,8 +275,6 @@ void Controller::lookupPulseTime() {
         tempPulseTime *= 1.4;
     }
 
-    throttleAdjustment = computeThrottleAdjustment(); // 1 + TPS^2 (THIS IS LIKELY A BUGGY FUNCTION)
-    //tempPulseTime *= throttleAdjustment; // USE THIS AFTER IDLE IS REACHED
     noInterrupts();
     injectorPulseTime = openTime + tempPulseTime * constModifier; // ADJUST OPEN TIME
     interrupts();
@@ -296,11 +285,9 @@ void Controller::calculateBasePulseTime(bool singleVal, int row, int col) {
   if (singleVal) {
     // Cover the range of pressure values from min - max inclusive.
     unsigned long pressure = map(row, 0, numTableRows - 1, minMAP, maxMAP);
-
     // Compute a base pulse time in units of microseconds * Kelvin. Temperature will be
     // divided on the fly to get the actual pulse time used.
-    injectorBasePulseTimes[row][col] = 1E6 * pressure * injectionConstant /
-                                     (fuelRatioTable[row][col]);
+    injectorBasePulseTimes[row][col] = 1E6 * pressure * injectionConstant / (fuelRatioTable[row][col]);
     return;
   }
 
@@ -308,16 +295,15 @@ void Controller::calculateBasePulseTime(bool singleVal, int row, int col) {
     for (int y = 0; y < numTableCols; y++) {
       // Cover the range of pressure values from min - max inclusive.
       unsigned long pressure = map(x, 0, numTableRows - 1, minMAP, maxMAP);
-
       // Compute a base pulse time in units of microseconds * Kelvin. Temperature will be
       // divided on the fly to get the actual pulse time used.
-      injectorBasePulseTimes[x][y] = 1E6 * pressure * injectionConstant /
-                                     (fuelRatioTable[x][y]);
+      injectorBasePulseTimes[x][y] = 1E6 * pressure * injectionConstant / (fuelRatioTable[x][y]);
     }
   }
 }
 
-void Controller::checkEngineState() {
+
+void Controller::updateEngineState() {
   if (detectEngineOff()) {
     revolutions = 0;
     startingRevolutions = 0;

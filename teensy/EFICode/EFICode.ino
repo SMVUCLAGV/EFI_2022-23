@@ -7,6 +7,8 @@
 #include "TimerOne.h"
 //#include "EEPROM.h"
 
+//Timer3 responsible for pulseOff, Timer1 responsible for sending data
+
 Controller *c;
 
 void setup() {
@@ -17,45 +19,37 @@ void setup() {
   c->updateRPM();
   c->readSensors();
 
-  // Attach rpm detector to revolution counter interrupt.
   // For some reason, the internal interrupt flags can end up defaulting
   // to a triggered state before they are attached. This causes them
   // to trigger once right when they are attached. Our current workaround
   // is to attach the interrupt to a dummy function first that triggers
   // if the interrupt is already set. Then, it is safe to attach the normal interrupt.
+
+  // Attach rpm detector to revolution counter interrupt.
   attachInterrupt(digitalPinToInterrupt(HES_Pin), dummy, RISING);
   detachInterrupt(digitalPinToInterrupt(HES_Pin));
-  attachInterrupt(digitalPinToInterrupt(HES_Pin), countRev, RISING );
+  attachInterrupt(digitalPinToInterrupt(HES_Pin), countRev, RISING);
+
 
   // Initialize pulseOff timer.
   Timer3.initialize(1000000);
-
   // Attach the interrupt for INJ pulse modulation.
-  // For some reason, the internal interrupt flags can end up defaulting
-  // to a triggered state before they are attached. This causes them
-  // to trigger once right when they are attached. Our current workaround
-  // is to attach the interrupt to a dummy function first that triggers
-  // if the interrupt is already set. Then, it is safe to attach the normal interrupt.
   Timer3.attachInterrupt(dummy);
   Timer3.detachInterrupt();
   Timer3.attachInterrupt(handle_pulseTimerTimeout);
-
   // Immediately stop the timer.
   Timer3.stop();
 
-  // FOR CHANGING PARAMETERS WITH BUTTON PRESSES
-  //attachInterrupt(digitalPinToInterrupt(2), lowerStartupMod, FALLING);
-  //attachInterrupt(digitalPinToInterrupt(3), raiseStartupMod, FALLING);
-  
+
+  // Attach the interrupt for data sending  
   Timer1.attachInterrupt(dummy);
   Timer1.detachInterrupt();
   Timer1.attachInterrupt(handle_sendData);
-  
+  // Set how often data is sent
   Timer1.setPeriod(DATA_RATE_PERIOD);
   Timer1.start();
   
   pinMode(LED_1, OUTPUT);  
-  digitalWrite(LED_1, LOW);
 }
 
 void loop() {
@@ -69,7 +63,7 @@ void loop() {
   c->lookupPulseTime();
  
   // Checks the status of the engine. e.g., detects whether the engine is on or off.
-  c->checkEngineState();
+  c->updateEngineState();
 
 }
 
@@ -78,7 +72,6 @@ void countRev() {
 }
 
 void handle_pulseTimerTimeout() {
-//toggle every time timer is stopped
   c->pulseOff();
 }
 

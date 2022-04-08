@@ -10,6 +10,7 @@
 * RPM Feedback
 * AFR Feedback
 * Startup Modifier
+* Throttle Adjustment
 
 ## Phase 2: Re-addition & new features (throughout  year)
 * Re-implemented obsolte code. we might need to buy new sensors and also revamp how EFI is done (move away from using the ideal gas law)
