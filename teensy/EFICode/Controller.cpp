@@ -19,10 +19,10 @@ Controller::Controller() {
     Serial.write("Initializing...\n");
 
     // Initialize parameters with their starting values.
-    initializeParameters();
+    this->initializeParameters();
 
     // Update sensors to their initial values.
-    readSensors();
+    this->readSensors();
 }
 
 
@@ -40,22 +40,8 @@ bool Controller::readSensors() {
     TPS = getTPS();
     ECT = getECT();
     IAT = getIAT();
+    s_map->readMAP(sensorVals);
 
-    MAP = getMAP();
-    MAPAvg->addData(MAP);
-    // Update  MAPPeak and MAPTrough
-    if(updateddMAP - micros() > minMAPdt) {
-        double dMAP = MAPAvg->getGauss() - prevMAP;
-        if((prevdMAP < 0) != (dMAP < 0)) { // if slopes have different sign
-           if(dMAP < 0)
-              MAPPeak = micros();
-           else
-              MAPTrough = micros();
-		}
-        prevdMAP = dMAP;
-		prevMAP = MAPAvg->getGauss();
-		updateddMAP = micros();
-    }
     refreshAvailable = true;
   }
     return true;
@@ -63,7 +49,6 @@ bool Controller::readSensors() {
 
 
 void Controller::initializeParameters() {
-
     // Start at zero revolutions.
     revolutions = 0;
     totalRevolutions = 0;
@@ -81,13 +66,7 @@ void Controller::initializeParameters() {
     lastThrottleMeasurementTime = micros();
 
     // Initialize MAP averaging
-    MAPAvg = new NoiseReduced(100);
-    MAP = 0;
-    prevdMAP = 0;
-    prevMAP = 0;
-    MAPPeak = 0;
-    MAPTrough = 0;
-    updateddMAP = 0;
+    s_map = new MAP();
 
     // Initialize MAP and RPM indicies to zero.
     mapIndex = 0;
@@ -153,7 +132,7 @@ void Controller::countRevolution() {
       if (totalRevolutions % 2 == 1)
           pulseOn();
   } else {  // inject when the time since the last trough is < 1 period (2 rotations between troughs)
-    if (!detectEngineOff() && (MAPAvg->getGauss() > MAP))//&& ((60 * 1E6) / RPM > micros() - MAPTrough))
+    if (!detectEngineOff() && (s_map->getMapGauss() > s_map->getMap()))//&& ((60 * 1E6) / RPM > micros() - MAPTrough))
           pulseOn();
   }
 }
@@ -245,7 +224,7 @@ void Controller::lookupPulseTime() {
     // Map the MAP and RPM readings to the dimensionns of the AFR lookup table
     noInterrupts();
 
-    scaledMAP = doubleMap(MAPAvg->getData(), minMAP, maxMAP, 0, numTableRows - 1); //number from 0 - numTableRows-1
+    scaledMAP = doubleMap(s_map->getMapData(), minMAP, maxMAP, 0, numTableRows - 1); //number from 0 - numTableRows-1
     scaledRPM = doubleMap(RPM, minRPM, maxRPM, 0, numTableCols - 1); //number from 0 - numTableCols-1
 
     // Clip out of bounds to the min or max value, whichever is closer.
@@ -329,4 +308,3 @@ bool Controller::detectEngineOff() {
   }
   return false;
 }
-

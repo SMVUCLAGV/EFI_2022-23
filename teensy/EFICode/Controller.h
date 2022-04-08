@@ -1,8 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "Constants.h"
-#include "NoiseReduced.h"
+#include "MAP.h"
 #include "spi_adc.h"
 
 class Controller {
@@ -122,14 +121,17 @@ private:
   double ECT;
   double IAT;
 
-  double MAP;
-  double prevdMAP;
-  double prevMAP;
-  unsigned long updateddMAP;
-  unsigned long MAPPeak; // time of previous peak
-  unsigned long MAPTrough; // time of previous trough
-  const unsigned long minMAPdt = 4000; // in microseconds
-  NoiseReduced* MAPAvg;
+  MAP* s_map;
+
+  // double MAP;
+  // double prevdMAP;
+  // double prevMAP;
+  // unsigned long updateddMAP;
+  // unsigned long MAPPeak; // time of previous peak
+  // unsigned long MAPTrough; // time of previous trough
+  // const unsigned long minMAPdt = 4000; // in microseconds
+  // NoiseReduced* MAPAvg;
+
   double AFR;
 
   //

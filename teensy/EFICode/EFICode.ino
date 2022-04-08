@@ -1,6 +1,5 @@
 //EFICode_2022-23
 
-
 #include "Controller.h"
 
 #include "TimerThree.h"
@@ -64,7 +63,6 @@ void loop() {
  
   // Checks the status of the engine. e.g., detects whether the engine is on or off.
   c->updateEngineState();
-
 }
 
 void countRev() {
