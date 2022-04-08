@@ -1,5 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef SMAP_H
+#define SMAP_H
 
 #include "NoiseReduced.h"
 #include "Constants.h"
@@ -13,9 +13,9 @@ const double MAPConversion = MAPSlope * voltConv;    // Pascals / 1023
 const unsigned long minMAPdt = 4000; // in microseconds
 
 
-class MAP {
+class SMAP {
     public:
-        MAP();
+        SMAP();
         //Fetch MAP's last stored value
         double getMap();
 

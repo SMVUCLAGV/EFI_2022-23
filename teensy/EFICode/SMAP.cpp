@@ -1,8 +1,8 @@
-#include "MAP.h"
+#include "SMAP.h"
 
 #include "Arduino.h"
 
-MAP::MAP(){
+SMAP::SMAP(){
     MAPAvg = new NoiseReduced(100);
     MAP_val = 0;
     prevdMAP = 0;
@@ -13,36 +13,36 @@ MAP::MAP(){
 }
 
 
-double MAP::getMap() {
+double SMAP::getMap() {
   return MAP_val;
 }
 
-double MAP::getMapSensor(int* sensorVals) {
+double SMAP::getMapSensor(int* sensorVals) {
   //Calculates MAP, outputs in Pa
   return MAPConversion * sensorVals[MAP_CHAN] + MAPOffset;
 }
 
-double MAP::getMapGauss(){
+double SMAP::getMapGauss(){
   return MAPAvg->getGauss();
 }
 
-double MAP::getMapData(){
+double SMAP::getMapData(){
   return MAPAvg->getData();
 }
 
-unsigned long MAP::getMAPPeak(){
+unsigned long SMAP::getMAPPeak(){
   return MAPPeak;
 }
 
-unsigned long MAP::getMAPTrough(){
+unsigned long SMAP::getMAPTrough(){
   return MAPTrough;
 }
 
-double MAP::getPrevdMAP(){
+double SMAP::getPrevdMAP(){
   return prevdMAP;
 }
 
-void MAP::readMAP(int* sensorVals){
+void SMAP::readMAP(int* sensorVals){
   MAP_val = getMapSensor(sensorVals);
 
   MAPAvg->addData(MAP_val);

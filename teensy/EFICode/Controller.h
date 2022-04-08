@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "MAP.h"
+#include "SMAP.h"
 #include "spi_adc.h"
 
 class Controller {
@@ -121,16 +121,7 @@ private:
   double ECT;
   double IAT;
 
-  MAP* s_map;
-
-  // double MAP;
-  // double prevdMAP;
-  // double prevMAP;
-  // unsigned long updateddMAP;
-  // unsigned long MAPPeak; // time of previous peak
-  // unsigned long MAPTrough; // time of previous trough
-  // const unsigned long minMAPdt = 4000; // in microseconds
-  // NoiseReduced* MAPAvg;
+  SMAP* s_map; //MAP module, responsible for collecting data and processing data from the Manifold Pressure Sensor
 
   double AFR;
 
