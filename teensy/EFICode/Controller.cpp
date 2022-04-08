@@ -66,7 +66,7 @@ void Controller::initializeParameters() {
     lastThrottleMeasurementTime = micros();
 
     // Initialize MAP averaging
-    s_map = new SMAP();
+    s_map = new SensorMAP();
 
     // Initialize MAP and RPM indicies to zero.
     mapIndex = 0;

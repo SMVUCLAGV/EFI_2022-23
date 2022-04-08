@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "SMAP.h"
+#include "SensorMAP.h"
 #include "spi_adc.h"
 
 class Controller {
@@ -121,7 +121,7 @@ private:
   double ECT;
   double IAT;
 
-  SMAP* s_map; //MAP module, responsible for collecting data and processing data from the Manifold Pressure Sensor
+  SensorMAP* s_map; //MAP module, responsible for collecting data and processing data from the Manifold Pressure Sensor
 
   double AFR;
 
