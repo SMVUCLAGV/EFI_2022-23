@@ -2,7 +2,7 @@
 
 
 #include "Controller.h"
-#include "Constants.h"
+
 #include "TimerThree.h"
 #include "TimerOne.h"
 //#include "EEPROM.h"
@@ -88,16 +88,6 @@ void handle_sendData() {
   // the ID 1 signal to the controller.
   c->trySendingData();
   Timer1.start();
-}
-
-void lowerStartupMod() {
-  c->lowerStartupModifier();
-  Serial.println("lower");
-}
-
-void raiseStartupMod() {
-  c->raiseStartupModifier();
-  Serial.println("raise");
 }
 
 void dummy() {}

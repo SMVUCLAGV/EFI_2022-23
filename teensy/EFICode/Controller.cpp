@@ -1,11 +1,8 @@
-#include "Controller.h"
+#include "Controller.h" //NoiseReduced, Constants.h, Tach.h, spi_adc.h
 
 #include "Arduino.h"
-#include "Constants.h"
 #include "TimerThree.h"
-#include "NoiseReduced.h"
 #include "SD.h"
-#include "spi_adc.h"
 
 Controller::Controller() {
     //Sets injector pin to output mode. All other pins default to input mode.
@@ -34,20 +31,19 @@ Controller::Controller() {
 }
 
 bool Controller::readSensors() {
-  if (refreshAvailable)
-  {
+  if (refreshAvailable){
     adc->refresh();
     refreshAvailable = false;
   }
+
   adc->checkEOC();
-  if (adc->get_validVals() == 1)
-  {
+
+  if (adc->get_validVals() == 1){
     const int* channels = adc->getChannels();
     sensorVals = channels;
     TPS = getTPS();
     ECT = getECT();
     IAT = getIAT();
-    setStartupModifier();
 
     MAP = getMAP();
     MAPAvg->addData(MAP);
@@ -90,7 +86,6 @@ void Controller::initializeParameters() {
 
     // Initialize AFR values.
     AFR = 0;
-    startupModifier = 1.00;
     throttleAdjustment = 1.0;
     lastThrottleMeasurementTime = micros();
 
@@ -286,7 +281,6 @@ void Controller::lookupPulseTime() {
 
     // Add extra fuel for starting
     if (inStartingRevs()){
-        //tempPulseTime *= startupModifier; // dictated by setStartupModifier() (this function has bugs)
         tempPulseTime *= 1.4;
     }
 
@@ -337,13 +331,6 @@ void Controller::checkEngineState() {
 
 bool Controller::inStartingRevs() {
    return startingRevolutions <= numRevsForStart;
-}
-
-
-const double startupModifierSlope = -0.0147;
-const double startupModifierInt = 5.5559;
-void Controller::setStartupModifier() {
-  startupModifier = startupModifierSlope * ECT + startupModifierInt;
 }
 
 

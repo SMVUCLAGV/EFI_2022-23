@@ -1,6 +1,6 @@
 #include "Controller.h"
+
 #include "Arduino.h"
-#include "Constants.h"
 #include "SD.h"
 #include "SPI.h"
 
@@ -24,7 +24,7 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
 	lastPulse,
 	scaledMAP, 
 	scaledRPM,
-	startupModifier,
+	AFR,
 	startingRevolutions <= numRevsForStart,
 	haveInjected,
 	MAPTrough,

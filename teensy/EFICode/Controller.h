@@ -3,6 +3,7 @@
 
 #include "Constants.h"
 #include "NoiseReduced.h"
+#include "Tachometer.h"
 #include "spi_adc.h"
 
 class Controller {
@@ -83,14 +84,11 @@ public:
   long interpolate2D(int blrow, int blcol, double x, double y);
   double doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut);
 
-  void setStartupModifier();
-  void lowerStartupModifier();
-  void raiseStartupModifier();
-
 private:
   // Has a value of true if the timer3 interrupt is detached from the "pulseOff" function.
   // Also prevents the injector from pulsing on if true.
   SPI_ADC* adc;
+
   bool refreshAvailable;
   const int* sensorVals;
 
@@ -124,7 +122,6 @@ private:
   int mapIndex;
   int rpmIndex;
 
-  double startupModifier;
   double throttleAdjustment;
   unsigned long lastThrottleMeasurementTime;
 
@@ -166,7 +163,6 @@ private:
   
   long injectorBasePulseTimes[numTableRows][numTableCols];
 
-  //double startupModifierTable[numPoints];
 };
 
 #endif
