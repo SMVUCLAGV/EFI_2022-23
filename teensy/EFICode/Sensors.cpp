@@ -80,34 +80,3 @@ double Controller::getMAP() {
   //Calculates MAP, outputs in Pa
   return MAPConversion * sensorVals[MAP_CHAN] + MAPOffset;
 }
-
-// Analog output 1 factory default settings for voltage ranges.
-const double AO1minAFR = 7.35;     //grams air to grams fuel at zero Volts
-const double AO1maxAFR = 22.39;    //grams air to grams fuel at five Volts
-const double AO1slope = (AO1maxAFR - AO1minAFR) / (5 - 0);
-
-// Analog output 2 factory default settings for voltage ranges
-const double AO2minAFR = 14;    //grams air to grams fuel at 0.1 Volts
-const double AO2maxAFR = 15;    //grams air to grams fuel at 1.1 Volts
-const double AO2slope = (AO2maxAFR - AO2minAFR) / (1.1 - 0.1);
-
-// IF O2 SENSOR IS ERRORING OR NOT READY, THE ANALOG OUTPUT IS SET TO BE EQUAL
-// TO ZERO VOLTS. THEREFORE, I HAVE IMPOSED A 0.05 Volt LIMITATION ON VOLTAGES READ
-// FROM THE O2 SENSOR. IF THE VOLTAGE READ IS LESS THAN 0.05 Volts, then the AFR
-// FEEDBACK LOOP WILL DO NOTHING! 
-
-// Returns the current measured AFR.
-double Controller::getAFR () {
-  // Gets Reading from O2 Sensor.
-  
-  // Calculate initial AFR reading.
-  AFRVolts->addData(voltConv * sensorVals[OIN1_CHAN]);
-  AFR = AFRVolts->getData() * AO1slope + AO1minAFR;
-  
-  // If AFR is close to stoich, use narrow band output with greater precision.
-//  if (AFR <= 15 && AFR >= 14) {
-//      AFR = voltageConversion * analogRead(OIN2_Pin) * AO2slope + AO2minAFR;
-//  }
-  
-  return AFR;
-}

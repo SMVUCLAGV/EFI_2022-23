@@ -44,7 +44,6 @@ SPI_ADC::SPI_ADC() {
 
 
 void SPI_ADC::refresh() {
-
   // Get Conversion Time
   convTime = micros();
 

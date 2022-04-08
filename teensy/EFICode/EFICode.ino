@@ -1,3 +1,6 @@
+//EFICode_2022-23
+
+
 #include "Controller.h"
 #include "Constants.h"
 #include "TimerThree.h"
@@ -61,20 +64,13 @@ void loop() {
 
   // Update Controller with most recent sensor values.
   c->readSensors();
-  //c->getAFR();
 
   // Look up injection time on each loop cycle
   c->lookupPulseTime();
-
-  // Adjust injectorBasePulseTime[][] Values by using feedback loop with O2 sensor.
-  //c->AFRFeedback();
-  //c->idleRPMFeedback();
  
   // Checks the status of the engine. e.g., detects whether the engine is on or off.
   c->checkEngineState();
 
-  // Check for commands from Serial port.
-  //c->getCommand();
 }
 
 void countRev() {
@@ -83,11 +79,6 @@ void countRev() {
 
 void handle_pulseTimerTimeout() {
 //toggle every time timer is stopped
-  /*if(digitalRead(LED_1) == 0){ 
-    digitalWrite(LED_1, HIGH);
-  }else{
-    digitalWrite(LED_1, LOW);
-  }*/
   c->pulseOff();
 }
 
@@ -96,7 +87,6 @@ void handle_sendData() {
   // currentlySendingData flag is set to true. This flag is set by sending 
   // the ID 1 signal to the controller.
   c->trySendingData();
-
   Timer1.start();
 }
 

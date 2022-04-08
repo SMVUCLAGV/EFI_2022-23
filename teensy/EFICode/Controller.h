@@ -20,9 +20,6 @@ public:
   // has passed since that last transmission, sends out a data sample.
   void trySendingData();
 
-  // Possibly obsolete.
-  void printEndingData();
-
   // Checks the serial read buffer for incoming bytes. If bytes are found, acts
   // according to the documentation specified in EFI Documentation.
   bool getCommand();
@@ -52,14 +49,6 @@ public:
   // the O2 sensor feedback loop has made to the base pulse times.
   void calculateBasePulseTime(bool singleVal, int row, int col);
 
-  // Sets the currentlySendingData flag to true, allowing the controller to report
-  // sampled data back to the DAQ system.
-  bool startDataTransmission();
-
-  // Sets the currentlySendingData flag to false, preventing the controller from
-  // reporting sampled data back to the DAQ system.
-  bool stopDataTransmission();
-
   // Returns true if the engine drops below the minimum RPM to consider the engine running.
   bool detectEngineOff();
 
@@ -88,12 +77,9 @@ public:
   double getIAT();
   double getECT();
   double getMAP();
-  double getAFR();
 
   void initializeParameters();
 
-  void AFRFeedback();
-  void idleRPMFeedback();
   long interpolate2D(int blrow, int blcol, double x, double y);
   double doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut);
 
@@ -109,8 +95,6 @@ private:
   const int* sensorVals;
 
   bool INJisDisabled; //flag
-  bool AFRFeedbackisEnabled;
-  bool RPMFeedbackisEnabled;
 
   int revolutions; //misc
   unsigned long totalRevolutions; //misc
@@ -139,17 +123,14 @@ private:
   double scaledRPM;
   int mapIndex;
   int rpmIndex;
-  long prevDeltaRPM;
 
   double startupModifier;
   double throttleAdjustment;
   unsigned long lastThrottleMeasurementTime;
 
-  int magnetsHit;
   double constModifier;
 
   long RPM;
-  long desiredRPM;
   double TPS;
   double DTPS;
   double ECT;
@@ -163,7 +144,6 @@ private:
   const unsigned long minMAPdt = 4000; // in microseconds
   NoiseReduced* MAPAvg;
   double AFR;
-  NoiseReduced* AFRVolts;
 
   //
   // For some undocumented reason they use this table to account for
@@ -177,27 +157,12 @@ private:
     {14.5,14.8,15.5,15.3,16.0,16.0,15.7,14.3,13.8,13.6},
     {14.5,16.0,19.2,19.2,16.0,16.0,15.7,14.3,13.8,13.6},
     {14.5,19.0,19.2,19.2,16.0,16.0,15.7,14.3,13.8,13.6},
-    {14.5,19.0,19.2,19.2,15.0,/**/15.2,14.6,14.3,13.8,13.6},//
-    {14.5,14.8,19.2,19.2,15.0,/**/15.2,14.6,14.3,13.8,13.6},//
+    {14.5,19.0,19.2,19.2,15.0,15.2,14.6,14.3,13.8,13.6},
+    {14.5,14.8,19.2,19.2,15.0,15.2,14.6,14.3,13.8,13.6},
     {14.5,14.8,19.2,19.2,15.3,15.2,14.6,14.3,13.8,13.6},
     {14.5,14.8,15.2,15.3,15.3,15.2,14.6,14.3,13.8,13.6},
     {14.5,14.8,15.0,15.3,15.3,15.2,14.6,14.3,13.8,13.6}   // maximum pressure
     };
-
-//  double fuelRatioTable[numTableRows][numTableCols] =
-//    {
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8},
-//      {17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8,17.8}
-//    };
   
   long injectorBasePulseTimes[numTableRows][numTableCols];
 
