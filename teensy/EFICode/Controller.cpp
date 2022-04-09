@@ -101,7 +101,6 @@ void Controller::initializeParameters() {
       }
     }
 
-
     // Calculate base pulse times from fuel ratio table. Should actually
     // store the last table used and recall it from memory here!
     calculateBasePulseTime(false, 0, 0);
@@ -113,10 +112,10 @@ void Controller::countRevolution() {
   //  When called too soon, we skip countRevolution
   //  When micros() overflows, we continue as if its a normal countRevolution
   if (micros() - previousRev > 0 && (micros() - previousRev < minDelayPerRev))
-     return;
+    return;
   previousRev = micros();
   if (INJisDisabled) {
-        enableINJ();
+    enableINJ();
   }
 
   // Increment the number of revolutions
@@ -132,11 +131,12 @@ void Controller::countRevolution() {
 
   //Inject on every second revolution because this is a 4 stroke engine
   if (!detectEngineOff() && inStartingRevs()) {
-      if (totalRevolutions % 2 == 1)
-          pulseOn();
-  } else {  // inject when the time since the last trough is < 1 period (2 rotations between troughs)
+    if (totalRevolutions % 2 == 1)
+      pulseOn();
+  } 
+  else {  // inject when the time since the last trough is < 1 period (2 rotations between troughs)
     if (!detectEngineOff() && (s_map->getMapGauss() > s_map->getMap()))//&& ((60 * 1E6) / RPM > micros() - MAPTrough))
-          pulseOn();
+      pulseOn();
   }
 }
 
