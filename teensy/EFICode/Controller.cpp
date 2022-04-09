@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "TimerThree.h"
 #include "SD.h"
+#include "math.h"
 
 Controller::Controller() {
     // Sets injector pin to output mode. All other pins default to input mode.
@@ -307,4 +308,8 @@ bool Controller::detectEngineOff() {
     return true;
   }
   return false;
+}
+
+long Controller::getRPM (long int timePassed, int rev) {
+  return (60 * 1E6 * rev) / (timePassed);
 }
