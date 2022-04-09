@@ -67,9 +67,6 @@ public:
 
   long getRPM (long int timePassed, int rev);
   double getTPS();
-  double getIAT();
-  double getECT();
-  double getMAP();
 
   void initializeParameters();
 
