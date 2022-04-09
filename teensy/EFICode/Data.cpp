@@ -13,8 +13,8 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
   sprintf(toSend, "%010u:%06i:%03.3f:%03.3f:%03.3f:%03.3f:%03.3f:%03.3f:%05i:%05i:%05i:%02.2f:%02.2f:%01.3f:%01i:%01i:%010u:%03.3f:%03.3f:%01i:%s:%01i:%03.3f\n", // about 97 bytes? (800-900 us)
   	micros(), 
 	totalRevolutions, 
-	ECT, 
-	IAT, 
+	s_temp->getECT(), 
+	s_temp->getIAT(), 
 	s_map->getMap(), 
 	s_map->getMapData(),
 	TPS, 
@@ -32,7 +32,7 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
   s_map->getMapGauss(),
   SDConnected,
   fileName,
-  ECT > MAX_ALLOWABLE_ECT,
+  s_temp->getECT() > MAX_ALLOWABLE_ECT,
   AFR);
 
   if(SDConnected) { // open and write to file

@@ -38,8 +38,9 @@ bool Controller::readSensors() {
     const int* channels = adc->getChannels();
     sensorVals = channels;
     TPS = getTPS();
-    ECT = getECT();
-    IAT = getIAT();
+
+    s_temp->getECTSensor(sensorVals);
+    s_temp->getIATSensor(sensorVals);
     s_map->readMAP(sensorVals);
 
     refreshAvailable = true;
@@ -122,7 +123,7 @@ void Controller::countRevolution() {
   startingRevolutions++;
 
   // MAX TEMP CHECK
-  if (ECT > MAX_ALLOWABLE_ECT){
+  if (s_temp->getECT() > MAX_ALLOWABLE_ECT){
     digitalWrite(LED_1, HIGH);
     return;
   }
@@ -242,11 +243,11 @@ void Controller::lookupPulseTime() {
     long tempPulseTime;
     if (rpmIndex < numTableCols - 1 && mapIndex < numTableRows - 1) {
         // Interpolation case
-        tempPulseTime = interpolate2D(mapIndex, rpmIndex, scaledMAP-mapIndex, scaledRPM-rpmIndex) / IAT;
+        tempPulseTime = interpolate2D(mapIndex, rpmIndex, scaledMAP-mapIndex, scaledRPM-rpmIndex) / s_temp->getIAT();
     }
     else {
         // Clipped case
-        tempPulseTime = injectorBasePulseTimes[mapIndex][rpmIndex] / IAT;
+        tempPulseTime = injectorBasePulseTimes[mapIndex][rpmIndex] / s_temp->getIAT();
     }
 
     // Add extra fuel for starting

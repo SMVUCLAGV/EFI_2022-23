@@ -2,6 +2,7 @@
 #define CONTROLLER_H
 
 #include "SensorMAP.h"
+#include "SensorTemp.h"
 #include "spi_adc.h"
 
 class Controller {
@@ -118,9 +119,8 @@ private:
   long RPM;
   double TPS;
   double DTPS;
-  double ECT;
-  double IAT;
 
+  SensorTemp* s_temp; //Temp Module, responsible for collecting data from the IAT and ECT Sensors
   SensorMAP* s_map; //MAP module, responsible for collecting data and processing data from the Manifold Pressure Sensor
 
   double AFR;
