@@ -37,8 +37,8 @@ bool Controller::readSensors() {
   if (adc->get_validVals() == 1){
     const int* channels = adc->getChannels();
     sensorVals = channels;
-    TPS = getTPS();
 
+    s_tps->getTPSSensor(sensorVals);
     s_temp->getECTSensor(sensorVals);
     s_temp->getIATSensor(sensorVals);
     s_map->readMAP(sensorVals);
@@ -64,10 +64,11 @@ void Controller::initializeParameters() {
 
     // Initialize AFR values.
     AFR = 0;
-    lastThrottleMeasurementTime = micros();
 
     // Initialize MAP averaging
     s_map = new SensorMAP();
+    s_temp = new SensorTemp();
+    s_tps = new SensorTPS();
 
     // Initialize MAP and RPM indicies to zero.
     mapIndex = 0;
@@ -138,6 +139,9 @@ void Controller::countRevolution() {
   }
 }
 
+double Controller::doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut) {
+    return ((val - minIn) / (maxIn - minIn)) * (maxOut - minOut) + minOut;
+}
 
 void Controller::enableINJ() {
   INJisDisabled = false;
@@ -213,11 +217,6 @@ long Controller::interpolate2D(int blrow, int blcol, double x, double y) {
     injectorBasePulseTimes[blrow+1][blcol]*(y)*(1-x)+
     injectorBasePulseTimes[blrow][blcol+1]*(1-y)*(x)+
     injectorBasePulseTimes[blrow+1][blcol+1]*(y)*(x);
-  }
-
-
-double Controller::doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut) {
-    return ((val - minIn) / (maxIn - minIn)) * (maxOut - minOut) + minOut;
   }
 
 

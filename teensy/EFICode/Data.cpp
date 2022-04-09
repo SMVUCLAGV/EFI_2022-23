@@ -17,7 +17,7 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
 	s_temp->getIAT(), 
 	s_map->getMap(), 
 	s_map->getMapData(),
-	TPS, 
+	s_tps->getTPS(), 
 	AFR, 
 	RPM, 
   injectorPulseTime,

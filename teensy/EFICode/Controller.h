@@ -3,6 +3,7 @@
 
 #include "SensorMAP.h"
 #include "SensorTemp.h"
+#include "SensorTPS.h"
 #include "spi_adc.h"
 
 class Controller {
@@ -66,13 +67,12 @@ public:
   void disableINJ();
 
   long getRPM (long int timePassed, int rev);
-  double getTPS();
 
   void initializeParameters();
 
   long interpolate2D(int blrow, int blcol, double x, double y);
-  double doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut);
 
+  double doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut);
 private:
   // Has a value of true if the timer3 interrupt is detached from the "pulseOff" function.
   // Also prevents the injector from pulsing on if true.
@@ -109,16 +109,14 @@ private:
   int mapIndex;
   int rpmIndex;
 
-  unsigned long lastThrottleMeasurementTime;
-
   double constModifier;
 
   long RPM;
-  double TPS;
-  double DTPS;
 
   SensorTemp* s_temp; //Temp Module, responsible for collecting data from the IAT and ECT Sensors
   SensorMAP* s_map; //MAP module, responsible for collecting data and processing data from the Manifold Pressure Sensor
+  SensorTPS* s_tps; //TPS Module, responsible for collecting TPS
+  
 
   double AFR;
 
