@@ -217,9 +217,49 @@ void Controller::countRevolution() {
 
 ### doubleMap()
 
+>Returns: double: mapped value\
+>Parameters: doubles: current value, input range (lo, hi), output range (lo, hi)
+
+Re-maps a floating-point double value from one range to another, analogous to the built-in Arduino function `map`
+
+```c++
+double Controller::doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut) {
+    return ((val - minIn) / (maxIn - minIn)) * (maxOut - minOut) + minOut;
+}
+```
+***
+
+
 ### enableINJ()
 
+>Returns: None\
+>Parameters: None
+
+Enables Fuel Injection (as the function name suggests)
+
+```c++
+void Controller::enableINJ() {
+  INJisDisabled = false;
+}
+```
+***
+
 ### disableINJ()
+
+>Returns: None\
+>Parameters: None
+
+Disables Fuel Injection (As the function name suggests)
+
+```c++
+void Controller::disableINJ() {
+  Timer3.stop();
+  digitalWrite(INJ_Pin, LOW);
+  noInterrupts();
+  INJisDisabled = true;
+  interrupts();
+}
+```
 
 
 
