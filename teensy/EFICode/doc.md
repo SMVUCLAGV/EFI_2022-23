@@ -52,7 +52,7 @@ Controller::Controller() {
 
 ***
 
-### InitializeParameters()
+### initializeParameters()
 >Returns: None\
 >Parameters: None
 
@@ -118,29 +118,108 @@ void Controller::initializeParameters() {
 ```
 ***
 
-### ReadSensors()
-* For more information, check out the ADC section of the documentation
-* Retrieves data from the MAX11624EEG+ ADC's outputs
-    * If ADC can be refreshed, refresh ADC data
-    * Then, If ADC output values are valid
-        * retrieve all analog sensor readings
+### readSensors()
 
-### CountRevolutions()
+>Returns: Boolean, indicating whether read is successful (not implemented)\
+>Parameters: None
 
+Retrieves analog sensor data readings from the MAX11624EEG+ ADC's outputs
 
-* Records and increments the total amount of revolutions the engine has gone through
+For more information, check out the ADC section of the documentation
+
+```c++
+bool Controller::readSensors() {
+  //If ADC can be refreshed, refresh ADC data
+  if (refreshAvailable){
+    adc->refresh();
+    refreshAvailable = false;
+  }
+
+  adc->checkEOC();
+  
+  // If ADC values are valid, retrieve all analog sensor readings
+  if (adc->get_validVals() == 1){
+    const int* channels = adc->getChannels();
+    sensorVals = channels;
+
+    s_tps->getTPSSensor(sensorVals);
+    s_temp->getECTSensor(sensorVals);
+    s_temp->getIATSensor(sensorVals);
+    s_map->readMAP(sensorVals);
+
+    refreshAvailable = true;
+  }
+  return true;
+}
+```
+***
+
+### countRevolutions()
+
+>Returns: None\
+>Parameters: None
+
+Records and increments the total amount of revolutions the engine has gone through. This function is also responsible for turning on the fuel injector on each of the engine's intake stroke. 
+
+This function is triggered on an interrupt by the flywheel's Hall Effect Sensor
+
+```c++
+void Controller::countRevolution() {
+  //  When called too soon, we skip countRevolution
+  //  When micros() overflows, we continue as if its a normal countRevolution
+  if (micros() - previousRev > 0 && (micros() - previousRev < minDelayPerRev))
+    return;
+  previousRev = micros();
+  if (INJisDisabled) {
+    enableINJ();
+  }
+
+  // Increment the number of revolutions
+  revolutions++;
+  totalRevolutions++;
+  startingRevolutions++;
+
+  // MAX TEMP CHECK
+  if (s_temp->getECT() > MAX_ALLOWABLE_ECT){
+    digitalWrite(LED_1, HIGH);
+    return;
+  }
+
+  //Inject on every second revolution because this is a 4 stroke engine
+  if (!detectEngineOff() && inStartingRevs()) {
+    if (totalRevolutions % 2 == 1)
+      pulseOn();
+  } 
+  else {  // inject when the time since the last trough is < 1 period (2 rotations between troughs)
+    if (!detectEngineOff() && (s_map->getMapGauss() > s_map->getMap()))//&& ((60 * 1E6) / RPM > micros() - MAPTrough))
+      pulseOn();
+  }
+}
+```
+
 * We keep three variables for counting engine revolutions
-    * `revolutions` responsible for RPM calculations (see updateRPM)
-    * `totalRevolutions` Counts the total amount of revs since the ECU first turned on
-    * `startingRevolutions` responsible for measuring revolutions every time the engine restarts while the electrical system is still on            
-* First, check for conditions where there may be undefined behavior
+    * `revolutions` responsible for RPM calculations. It resets to 0 after each calculation cycle for RPM (see `updateRPM()`)
+    * `totalRevolutions` counts the total amount of revs since the vehicle's electrical system was first turned on
+    * `startingRevolutions` is responsible for measuring revolutions every time the engine restarts while the electrical system is still on. This works in tandem with the `inStartingRevs()` function to enable special fuel injection behavior when the engine is first turned on (more information below)            
+* First, three conditions to eliminate where there may be undefined behavior
     * If called too soon since the last revolution (an unreasonably short amount of time (smaller than `minDelayPerRev`) has passed since the last hall effect sensor hit), the function returns without the rev counts incrementing
-    * When `micros()` overflows (in which case `micros` will be smaller than `previousRev`), the function also returns
-    * If the engine is overheating (exceeds `MAX_ALLOWABLE_ECT`), the function also returns, preventing fuel combustion any further to protect mechanical components of the engine
+    * When `micros()` overflows (in which case `micros` will go back to 0 and become smaller than `previousRev`), the function returns with rev counts incrementing
+    * If the engine is overheating (exceeds `MAX_ALLOWABLE_ECT`), the function also returns, preventing fuel combustion any further to protect mechanical components of the engine.
+* If none of the above conditions occur, we proceed by recording the timestamp of the current HES hit, and increment all the rev counters
+    * stored as variable `previousRev` so that it can be referred to in the future for RPM calculations
+* There are two situations that calls for different ways to handle fuel injection
+    * When the engine has just started, we inject fuel every two revolutions. This is because the intake stroke takes place once every two revolutions, for more information, look at the four-stroke engine (intake, compression, combustion, exhaust). 
+    * After the engine has been running a while, we switch to use our MAP (manifold air pressure) sensor for fuel injection. Injection takes place when the average MAP is higher than the current instantaneous MAP, in other words: when there is a sudden dip in manifold pressure. This is because on an intake stroke, the cylinder's volume increases as the piston moves down, drawing air through the intake into the engine. 
+    * Why do we treat the two differently
+        * When the engine has just started, it is far from reaching its ideal working conditions yet in terms of temperature, pressure, fuel vaporization, etc. By manually timing it to inject every two revolutions, we can ensure it is getting fuel when needed.
+        * After a while, the engine has reached its working temperatures, meaning idling and running will be a lot more consistent. In this case, relying on the pressure sensor would be more accurate as the hall effect sensor can sometimes deliver faulty readings (double-counts) over the long term. 
+***
 
-* If none of the above conditions occur, we proceed by recording the timestamp of the current revolution, and increment all the rev counters
-    * stored as variable `previosRev` so that it can be referred to in the future for RPM calculations
+### doubleMap()
 
+### enableINJ()
+
+### disableINJ()
 
 
 
