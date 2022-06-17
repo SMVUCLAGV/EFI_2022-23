@@ -54,9 +54,9 @@ void Controller::initializeParameters() {
     // Start at zero revolutions.
     revolutions = 0;
     totalRevolutions = 0;
+    startingRevolutions = 0;
 
     // Number of revolutions that must pass before recalculating RPM.
-    constModifier = 1.0;
     previousRev = micros();
 
     // Initialize ADC
@@ -79,10 +79,11 @@ void Controller::initializeParameters() {
     // Used to detach the timer interrupt for pulsing off
     // when the engine is not running.
     INJisDisabled = true;
+    constModifier = 1.0;
 
     // Used to determine the amount of fuel used. (W22)
-    totalPulseTime = 0;
     lastPulse = 0;
+    totalPulseTime = 0;
     totalFuelUsed = 0;
 
     // True   -> data reporting on.
