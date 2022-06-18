@@ -9,7 +9,11 @@ prepared by mike qu
 * Output useful data for analysis
 <br>
 
-
+## A list of functions called by interrupts
+* `dummy()`
+* `countRev()` -> `c->countRevolution();`
+* `handle_pulseTimerTimeout()` -> `c->pulseOff();`
+* `handle_sendData()` -> `c->trySendingData();`
 
 
 # Controller Module 
@@ -227,11 +231,11 @@ double Controller::doubleMap(double val, double minIn, double maxIn, double minO
     return ((val - minIn) / (maxIn - minIn)) * (maxOut - minOut) + minOut;
 }
 ```
+* Mainly used to map data (particularly MAP and RPM) to a lower range where they can be cast into discrete values. This makes tuning for the Air-fuel ratio table much easier
 ***
 
 
 ### enableINJ()
-
 >Returns: None\
 >Parameters: None
 
@@ -245,7 +249,6 @@ void Controller::enableINJ() {
 ***
 
 ### disableINJ()
-
 >Returns: None\
 >Parameters: None
 
@@ -260,8 +263,77 @@ void Controller::disableINJ() {
   interrupts();
 }
 ```
+***
 
+### pulseOn()
+>Returns: None\
+>Parameters: None
 
+Turn on fuel injector
+
+```c++
+void Controller::pulseOn() {
+  // disable data sending
+  currentlySendingData = false;
+  if (injectorPulseTime > 2.5E5)
+    injectorPulseTime = 2.5E5;
+  Timer3.setPeriod(injectorPulseTime);
+  digitalWrite(INJ_Pin, HIGH);
+  Timer3.start();
+  noInterrupts(); //To ensure when lastPulse is used in pulseOff(), it isn't read as lastPulse is getting modified
+  lastPulse = micros(); //Race Conditions Problem
+  interrupts();
+}
+```
+* During testing, there are cases in which the injector turns on, but never turns off again, spilling fuel everywhere through the throttle body. A temporary fix where we limit the maximum injector pulse time is applied but should be looked into further.
+***
+
+### pulseOff()
+>Returns: None\
+>Parameters: None
+
+Turn off fuel injector
+
+```c++
+void Controller::pulseOff() {
+  // When it's time to turn the injector off, follow these steps and turn it off
+  digitalWrite(INJ_Pin, LOW);
+  Timer3.stop();
+
+  // Save the amount of time the injector pin spent HIGH.
+  totalPulseTime += (micros() - lastPulse);
+
+  // Let data be sent again
+  currentlySendingData = enableSendingData;
+  haveInjected = true;
+}
+
+```
+***
+
+### updateRPM()
+
+```c++
+void Controller::updateRPM() {
+  noInterrupts();
+  int tempRev = revolutions; //Prevents revolutions being read while it is being modified by the
+  //countRevolution() function associated with the interrupt
+  interrupts();
+  if (tempRev >= revsPerCalc) {
+    noInterrupts(); //To ensure that the interrupt of countRev doesn't get lost in case of bad timing of threads
+    unsigned long currentRPMCalcTime = micros();
+    if(currentRPMCalcTime - lastRPMCalcTime > 0) // only write if this value is positive (protect from overflow)
+    	RPM = getRPM(currentRPMCalcTime - lastRPMCalcTime, tempRev); //Uses the previously determined value of revolutions to reduce
+    //amount of noInterrupts() calls
+    lastRPMCalcTime = currentRPMCalcTime;
+    revolutions = 0; //Race Conditions Modification Problem
+    interrupts();
+
+    // Should also dynamically change revsPerCalc. At lower RPM
+    // the revsPerCalc should be lower but at higher RPM it should be higher.
+  }
+}
+```
 
 # Sensor Modules
 
