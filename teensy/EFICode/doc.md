@@ -434,6 +434,34 @@ void Controller::lookupPulseTime() {
 
 ### calculateBasePulseTime()
 
+>Returns: None\
+>Parameters: None
+
+Populate base injector pulse time table based on current pressure and other conditions
+
+```c++
+void Controller::calculateBasePulseTime(bool singleVal, int row, int col) {
+  if (singleVal) {
+    // Cover the range of pressure values from min - max inclusive.
+    unsigned long pressure = map(row, 0, numTableRows - 1, minMAP, maxMAP);
+    // Compute a base pulse time in units of microseconds * Kelvin. Temperature will be
+    // divided on the fly to get the actual pulse time used.
+    injectorBasePulseTimes[row][col] = 1E6 * pressure * injectionConstant / (fuelRatioTable[row][col]);
+    return;
+  }
+
+  for (int x = 0; x < numTableRows; x++) {
+    for (int y = 0; y < numTableCols; y++) {
+      // Cover the range of pressure values from min - max inclusive.
+      unsigned long pressure = map(x, 0, numTableRows - 1, minMAP, maxMAP);
+      // Compute a base pulse time in units of microseconds * Kelvin. Temperature will be
+      // divided on the fly to get the actual pulse time used.
+      injectorBasePulseTimes[x][y] = 1E6 * pressure * injectionConstant / (fuelRatioTable[x][y]);
+    }
+  }
+}
+```
+
 
 
 
