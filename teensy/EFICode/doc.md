@@ -379,7 +379,60 @@ long Controller::interpolate2D(int blrow, int blcol, double x, double y) {
     injectorBasePulseTimes[blrow+1][blcol+1]*(y)*(x);
   }
 ```
+***
 
+
+### lookupPulseTime()
+
+>Returns: None\
+>Parameters: None
+
+Figure out how much fuel to inject using the AFR table
+
+```c++
+void Controller::lookupPulseTime() {
+    // Map the MAP and RPM readings to the dimensionns of the AFR lookup table
+    noInterrupts();
+
+    scaledMAP = doubleMap(s_map->getMapData(), minMAP, maxMAP, 0, numTableRows - 1); //number from 0 - numTableRows-1
+    scaledRPM = doubleMap(RPM, minRPM, maxRPM, 0, numTableCols - 1); //number from 0 - numTableCols-1
+
+    // Clip out of bounds to the min or max value, whichever is closer.
+    scaledMAP = constrain(scaledMAP, 0, numTableRows - 1);
+    scaledRPM = constrain(scaledRPM, 0, numTableCols - 1);
+
+    // Get lower bounds for load and rpm indicies.
+    mapIndex = scaledMAP; // double to int
+    rpmIndex = scaledRPM;
+
+    interrupts();
+
+    // Clip extrapolation to the value at the max index. Otherwise, perform 2D interpolation to get
+    // the base pulse time and then divide by the temperature.
+    long tempPulseTime;
+    if (rpmIndex < numTableCols - 1 && mapIndex < numTableRows - 1) {
+        // Interpolation case
+        tempPulseTime = interpolate2D(mapIndex, rpmIndex, scaledMAP-mapIndex, scaledRPM-rpmIndex) / s_temp->getIAT();
+    }
+    else {
+        // Clipped case
+        tempPulseTime = injectorBasePulseTimes[mapIndex][rpmIndex] / s_temp->getIAT();
+    }
+
+    // Add extra fuel for starting
+    if (inStartingRevs()){
+        tempPulseTime *= 1.4;
+    }
+
+    noInterrupts();
+    injectorPulseTime = openTime + tempPulseTime * constModifier; // ADJUST OPEN TIME
+    interrupts();
+}
+```
+***
+
+
+### calculateBasePulseTime()
 
 
 
