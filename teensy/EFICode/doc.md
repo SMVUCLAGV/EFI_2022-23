@@ -312,13 +312,18 @@ void Controller::pulseOff() {
 ***
 
 ### updateRPM()
+>Returns: None\
+>Parameters: None
+
+Obtains a new RPM reading
 
 ```c++
 void Controller::updateRPM() {
+  //Prevent revolutions being read while it is being modified by the countRevolution() function associated with the interrupt
   noInterrupts();
-  int tempRev = revolutions; //Prevents revolutions being read while it is being modified by the
-  //countRevolution() function associated with the interrupt
+  int tempRev = revolutions; 
   interrupts();
+
   if (tempRev >= revsPerCalc) {
     noInterrupts(); //To ensure that the interrupt of countRev doesn't get lost in case of bad timing of threads
     unsigned long currentRPMCalcTime = micros();
@@ -326,14 +331,17 @@ void Controller::updateRPM() {
     	RPM = getRPM(currentRPMCalcTime - lastRPMCalcTime, tempRev); //Uses the previously determined value of revolutions to reduce
     //amount of noInterrupts() calls
     lastRPMCalcTime = currentRPMCalcTime;
-    revolutions = 0; //Race Conditions Modification Problem
+    revolutions = 0; //Reset revolutions to 0 now that RPM count is complete (race condition modification)
     interrupts();
 
+    // Potential project:
     // Should also dynamically change revsPerCalc. At lower RPM
     // the revsPerCalc should be lower but at higher RPM it should be higher.
   }
 }
 ```
+
+* Calculates RPM by measuring the time elapsed over revsPerCalc revs (hits of the flywheel HES)
 
 # Sensor Modules
 
