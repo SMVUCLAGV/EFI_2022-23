@@ -340,8 +340,49 @@ void Controller::updateRPM() {
   }
 }
 ```
-
 * Calculates RPM by measuring the time elapsed over revsPerCalc revs (hits of the flywheel HES)
+***
+
+
+### getFuelUsed()
+
+>Returns: long (amount of fuel used since electrical startup in mL) \
+>Parameters: None
+
+Obtains the amount of fuel used since electrical system startup (in milliliters)
+
+```c++
+long Controller::getFuelUsed() {
+  //volumetric flow rate = mass flow rate / density
+  return givenFlow * totalPulseTime / density; //in mL
+}
+```
+***
+
+
+### interpolate2D()
+
+>Returns: long (amount of fuel used since electrical startup in mL) \
+>Parameters: int (bottom left row, col), double (unit x and y)
+
+Performs interpolation to smooth out the AFR table, such that transitions from one range of RPM/MAP to another is gradual and not an instantaneous jump
+
+```c++
+long Controller::interpolate2D(int blrow, int blcol, double x, double y) {
+    // Takes the coordinate of the bottom left corner of the square to perform 2D interpolation over.
+    // x and y must be given in unit form. i.e., y = (yc-y1)/(y2-y1) and x = (xc-x1)/(x2-x1)
+    // (0 <= y <= 1 and 0 <= x <= 1)
+    return
+    injectorBasePulseTimes[blrow][blcol]*(1-y)*(1-x)+
+    injectorBasePulseTimes[blrow+1][blcol]*(y)*(1-x)+
+    injectorBasePulseTimes[blrow][blcol+1]*(1-y)*(x)+
+    injectorBasePulseTimes[blrow+1][blcol+1]*(y)*(x);
+  }
+```
+
+
+
+
 
 # Sensor Modules
 
