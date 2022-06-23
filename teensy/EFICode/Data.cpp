@@ -40,12 +40,25 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
     logFile.write(toSend);
     logFile.close();
   }
+  sendInfo(toSend);
   Serial.write(toSend);
 }
+
+bool Controller::sendInfo(char* str){
+  char* i = str;
+  while (*i != '\n'){
+    char cur_char = *i;
+    Serial1.write(cur_char);
+    i++;
+  }
+  Serial1.write('\n');
+  return true;
+}
+
 
 void Controller::trySendingData() {
   if (currentlySendingData) {
       sendCurrentData();
       haveInjected = false;
-    }
   }
+}

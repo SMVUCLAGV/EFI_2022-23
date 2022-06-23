@@ -11,6 +11,7 @@ Controller::Controller() {
 
     // Initializes Serial input and output at the specified baud rate.
     Serial.begin(BAUD_RATE);
+    Serial1.begin(115200);
 
     // Prevent blocking caused by the lack of a serial connection with a laptop (fixed W22)
     long t = micros();

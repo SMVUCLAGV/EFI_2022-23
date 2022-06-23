@@ -73,6 +73,8 @@ public:
   long interpolate2D(int blrow, int blcol, double x, double y);
 
   double doubleMap(double val, double minIn, double maxIn, double minOut, double maxOut);
+
+  bool sendInfo(char* str);
 private:
   // Has a value of true if the timer3 interrupt is detached from the "pulseOff" function.
   // Also prevents the injector from pulsing on if true.
