@@ -227,7 +227,7 @@ void Controller::lookupPulseTime() {
     // Map the MAP and RPM readings to the dimensionns of the AFR lookup table
     noInterrupts();
 
-    scaledMAP = doubleMap(s_map->getMapData(), minMAP, maxMAP, 0, numTableRows - 1); //number from 0 - numTableRows-1
+    scaledMAP = doubleMap(s_map->getMapAvg(), minMAP, maxMAP, 0, numTableRows - 1); //number from 0 - numTableRows-1
     scaledRPM = doubleMap(RPM, minRPM, maxRPM, 0, numTableCols - 1); //number from 0 - numTableCols-1
 
     // Clip out of bounds to the min or max value, whichever is closer.

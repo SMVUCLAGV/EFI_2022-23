@@ -24,11 +24,12 @@ class SensorMAP {
 
         //MAP Averaging Getter Functions
         double getMapGauss();
-        double getMapData();
+        double getMapAvg();
         unsigned long getMAPPeak();
         unsigned long getMAPTrough();
         double getPrevdMAP();
-
+        double verifyMAP(double val);
+        
         //Reads the MAP Sensor's values and performs averaging
         void readMAP(int* sensorVals);
 

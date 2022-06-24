@@ -10,13 +10,25 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
 // -whether we are still on startup cycles
 // -engine on? (or just use RPM = 0)
   char toSend [1000];
+  char ecuData [500];
+  sprintf(ecuData, "%010u:%06i:%03.3f:%03.3f:%03.3f:%03.3f:%03.3f:%05i\n",//56 bytes
+    micros(),
+    totalRevolutions, 
+    s_temp->getECT(), 
+    s_temp->getIAT(), 
+    s_map->verifyMAP(s_map->getMap()), 
+    s_map->verifyMAP(s_map->getMapAvg()),
+    s_tps->getTPS(), 
+    RPM
+  );
+  
   sprintf(toSend, "%010u:%06i:%03.3f:%03.3f:%03.3f:%03.3f:%03.3f:%03.3f:%05i:%05i:%05i:%02.2f:%02.2f:%01.3f:%01i:%01i:%010u:%03.3f:%03.3f:%01i:%s:%01i:%03.3f\n", // about 97 bytes? (800-900 us)
   	micros(), 
 	totalRevolutions, 
 	s_temp->getECT(), 
 	s_temp->getIAT(), 
 	s_map->getMap(), 
-	s_map->getMapData(),
+	s_map->getMapAvg(),
 	s_tps->getTPS(), 
 	AFR, 
 	RPM, 
@@ -40,8 +52,10 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
     logFile.write(toSend);
     logFile.close();
   }
-  sendInfo(toSend);
-  Serial.write(toSend);
+  
+  sendInfo(ecuData);
+  Serial.write(ecuData);
+  //Serial.println(ecuData);
 }
 
 bool Controller::sendInfo(char* str){

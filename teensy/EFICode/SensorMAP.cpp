@@ -26,7 +26,7 @@ double SensorMAP::getMapGauss(){
   return MAPAvg->getGauss();
 }
 
-double SensorMAP::getMapData(){
+double SensorMAP::getMapAvg(){
   return MAPAvg->getData();
 }
 
@@ -40,6 +40,12 @@ unsigned long SensorMAP::getMAPTrough(){
 
 double SensorMAP::getPrevdMAP(){
   return prevdMAP;
+}
+
+double SensorMAP::verifyMAP(double val){
+  if (val < -10000)
+    return -1.0;
+  return 0;
 }
 
 void SensorMAP::readMAP(int* sensorVals){
