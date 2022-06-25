@@ -18,7 +18,7 @@ Controller::Controller() {
     while(!Serial && (micros() - t < 1e6));
 
     // Initializing message
-    Serial.write("Initializing...\n");
+    Serial.println("Initializing...\n");
 
     // Initialize parameters with their starting values.
     this->initializeParameters();

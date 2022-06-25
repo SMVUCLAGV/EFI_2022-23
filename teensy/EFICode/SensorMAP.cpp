@@ -43,9 +43,9 @@ double SensorMAP::getPrevdMAP(){
 }
 
 double SensorMAP::verifyMAP(double val){
-  if (val < -10000)
+  if (val > 300000 | val < -100000)
     return -1.0;
-  return 0;
+  return val;
 }
 
 void SensorMAP::readMAP(int* sensorVals){

@@ -11,13 +11,13 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
 // -engine on? (or just use RPM = 0)
   char toSend [1000];
   char ecuData [500];
-  sprintf(ecuData, "%010u:%06i:%03.3f:%03.3f:%03.3f:%03.3f:%03.3f:%05i\n",//56 bytes
+  sprintf(ecuData, "%010u:%06i:%03.3f:%03.3f:%06.3f:%06.3f:%03.3f:%05i\n",//56 bytes
     micros(),
     totalRevolutions, 
     s_temp->getECT(), 
     s_temp->getIAT(), 
-    s_map->verifyMAP(s_map->getMap()), 
-    s_map->verifyMAP(s_map->getMapAvg()),
+    s_map->getMap(), 
+    s_map->getMapAvg(),
     s_tps->getTPS(), 
     RPM
   );
