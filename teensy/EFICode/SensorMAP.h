@@ -28,7 +28,7 @@ class SensorMAP {
         unsigned long getMAPPeak();
         unsigned long getMAPTrough();
         double getPrevdMAP();
-        double verifyMAP(double val);
+        double verifyMAP(double val); //filtering out MAP values that don't make sense (UNUSED)
         
         //Reads the MAP Sensor's values and performs averaging
         void readMAP(int* sensorVals);

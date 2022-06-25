@@ -11,6 +11,7 @@ void Controller::sendCurrentData() { // THIS MUST TAKE LESS THAN 1 ms (to guarun
 // -engine on? (or just use RPM = 0)
   char toSend [1000];
   char ecuData [500];
+  //NOTE: micros() will overflow if system is on for 70 minutes!
   sprintf(ecuData, "%010u:%06i:%03.3f:%03.3f:%06.3f:%06.3f:%03.3f:%05i\n",//56 bytes
     micros(),
     totalRevolutions, 

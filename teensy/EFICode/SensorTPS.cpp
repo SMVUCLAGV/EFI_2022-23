@@ -5,6 +5,7 @@
 
 SensorTPS::SensorTPS() {
     lastThrottleMeasurementTime = micros();
+    TPSval = 0;
 }
 
 void SensorTPS::getTPSSensor(int* sensorVals) {
