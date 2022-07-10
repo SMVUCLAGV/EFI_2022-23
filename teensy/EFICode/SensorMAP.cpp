@@ -4,9 +4,9 @@
 
 SensorMAP::SensorMAP(){
     MAPAvg = new NoiseReduced(100);
-    MAP_val = 0;
-    prevdMAP = 0;
-    prevMAP = 0;
+    m_MAPval = 0;
+    m_prevdMAP = 0;
+    m_prevMAP = 0;
     MAPPeak = 0;
     MAPTrough = 0;
     updateddMAP = 0;
@@ -14,10 +14,10 @@ SensorMAP::SensorMAP(){
 
 
 double SensorMAP::getMap() {
-  return MAP_val;
+  return m_MAPval;
 }
 
-double SensorMAP::getMapSensor(int* sensorVals) {
+double SensorMAP::getMAPSensor(int* sensorVals) {
   //Calculates MAP, outputs in Pa
   return MAPConversion * sensorVals[MAP_CHAN] + MAPOffset;
 }
@@ -31,15 +31,15 @@ double SensorMAP::getMapAvg(){
 }
 
 unsigned long SensorMAP::getMAPPeak(){
-  return MAPPeak;
+  return m_tMAPpeak;
 }
 
 unsigned long SensorMAP::getMAPTrough(){
-  return MAPTrough;
+  return m_tMAPtrough;
 }
 
 double SensorMAP::getPrevdMAP(){
-  return prevdMAP;
+  return m_prevdMAP;
 }
 
 double SensorMAP::verifyMAP(double val){
@@ -48,21 +48,21 @@ double SensorMAP::verifyMAP(double val){
   return val;
 }
 
-void SensorMAP::readMAP(int* sensorVals){
-  MAP_val = getMapSensor(sensorVals);
+void SensorMAP::calcMAPAvg(int* sensorVals){
+  m_MAPval = getMAPSensor(sensorVals);
 
-  MAPAvg->addData(MAP_val);
+  MAPAvg->addData(m_MAPval);
   // Update MAPPeak and MAPTrough
-  if(updateddMAP - micros() > minMAPdt) {
-    double dMAP = MAPAvg->getGauss() - prevMAP;
-    if((prevdMAP < 0) != (dMAP < 0)) { // if slopes have different sign
+  if(m_tMAPupdate - micros() > minMAPdt) {
+    double dMAP = MAPAvg->getGauss() - m_prevMAP;
+    if((m_prevdMAP < 0) != (dMAP < 0)) { // if slopes have different sign
       if(dMAP < 0)
-        MAPPeak = micros();
+        m_tMAPpeak = micros();
       else
-        MAPTrough = micros();
+        m_tMAPtrough = micros();
 	  }
-    prevdMAP = dMAP;
-		prevMAP = MAPAvg->getGauss();
-	  updateddMAP = micros();
+    m_prevdMAP = dMAP;
+		m_prevMAP = MAPAvg->getGauss();
+	  m_tMAPupdate = micros();
   }
 }

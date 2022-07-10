@@ -20,7 +20,7 @@ class SensorMAP {
         double getMap();
 
         //Fetch a new MAP value from the sensor
-        double getMapSensor(int* sensorVals);
+        double getMAPSensor(int* sensorVals);
 
         //MAP Averaging Getter Functions
         double getMapGauss();
@@ -31,18 +31,18 @@ class SensorMAP {
         double verifyMAP(double val); //filtering out MAP values that don't make sense (UNUSED)
         
         //Reads the MAP Sensor's values and performs averaging
-        void readMAP(int* sensorVals);
+        void calcMAPAvg(int* sensorVals);
 
     private:
-        double MAP_val;
+        double m_MAPval;
 
-        double prevdMAP;
-        double prevMAP;
-        unsigned long updateddMAP;
-        unsigned long MAPPeak; // time of previous peak
-        unsigned long MAPTrough; // time of previous trough
+        double m_prevdMAP;
+        double m_prevMAP;
+        unsigned long m_tMAPupdate; // time of MAP update
+        unsigned long m_tMAPpeak; // time of previous peak
+        unsigned long m_tMAPtrough; // time of previous trough
 
-        NoiseReduced* MAPAvg;
+        NoiseReduced* m_MAPAvg;
 };
 
 #endif

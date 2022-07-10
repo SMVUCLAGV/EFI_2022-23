@@ -43,7 +43,7 @@ bool Controller::readSensors() {
     s_tps->getTPSSensor(sensorVals);
     s_temp->getECTSensor(sensorVals);
     s_temp->getIATSensor(sensorVals);
-    s_map->readMAP(sensorVals);
+    s_map->calcMAPAvg(sensorVals);
 
     refreshAvailable = true;
   }
